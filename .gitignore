@@ -1,0 +1,12 @@
+**/target
+**/.idea
+*.iml
+*.ipr
+.DS_Store
+.idea
+pom.xml.bak
+pom.xml.versionsBackup
+target/
+.classpath
+.project
+.settings
