@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
+import org.openqa.selenium.WebDriver;
 import ru.kupchagagroup.config.external.TradeConfig;
 import ru.kupchagagroup.config.internal.OpskinHeaders;
 import ru.kupchagagroup.domain.Offer;
@@ -40,11 +41,11 @@ public class PurchaseScanner {
         this.purchaseExecutor = new PurchaseExecutor(httpClient, opskinHeaders);
     }
 
-    public void startProfitPurchaseScanning() {
+    public void startProfitPurchaseScanning(WebDriver driver) {
         RefreshStatistics statistics = new RefreshStatistics();
         while (true) {
             try {
-                String offersPageSource = getPageSource(NEW_SCAN_PAGE_URL, statistics);
+                String offersPageSource = getPageSource(NEW_SCAN_PAGE_URL, statistics, driver);
                 if (!offersPageSource.contains("OPSkins Bot Detection")) {
                     if (offersPageSource
                             .contains("In order to perform a custom search you must first log in. (1003)")) {
@@ -71,10 +72,10 @@ public class PurchaseScanner {
         }
     }
 
-    private String getPageSource(String scanPageUrl, RefreshStatistics statistics) throws IOException {
+    private String getPageSource(String scanPageUrl, RefreshStatistics statistics, WebDriver driver) throws IOException {
         long refreshStartTime = System.currentTimeMillis();
         HttpGet get = new HttpGet(scanPageUrl);
-        setNewGetHeaders(get, scanPageUrl);
+        setGetHeaders(get, scanPageUrl);
         InputStream content = null;
         String pageSource;
         try {
@@ -88,14 +89,14 @@ public class PurchaseScanner {
             }
             get.releaseConnection();
         }
-        //driver.get(scanPageUrl);
-        //String pageSource = driver.getPageSource();
+//        driver.get(scanPageUrl);
+//        String pageSourceFromWebDriver = driver.getPageSource();
         statistics.updateRefreshTime(System.currentTimeMillis() - refreshStartTime);
         log.debug((float) (System.currentTimeMillis() - refreshStartTime) / 1000 + " seconds spent on refresh");
         return pageSource;
     }
 
-    private void setNewGetHeaders(HttpRequestBase post, String referer) {
+    private void setGetHeaders(HttpRequestBase post, String referer) {
         //post.setHeader("host", "opskins.com");
         post.setHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         post.setHeader("accept-encoding", "gzip, deflate, br");
@@ -106,6 +107,7 @@ public class PurchaseScanner {
         //post.setHeader("upgrade-insecure-requests", "1");
         post.setHeader("user-agent",
                 HeadersUtil.USER_AGENT_HEADER_VALUE);
-        //post.setHeader("connection", "keep-alive");
+        post.setHeader("connection", "keep-alive");
+        post.setHeader("Cache-Control", "max-age=0");
     }
 }

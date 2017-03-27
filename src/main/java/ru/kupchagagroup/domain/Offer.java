@@ -1,12 +1,14 @@
 package ru.kupchagagroup.domain;
 
+import java.util.Objects;
+
 public class Offer {
     private Item item;
     private int discount;
     private double price;
-    private int addToCartId;
+    private String addToCartId;
 
-    public Offer(String name, String quality, int discount, double price, int addToCartId) {
+    public Offer(String name, String quality, int discount, double price, String addToCartId) {
         item = new Item(name, quality);
         this.discount = discount;
         this.price = price;
@@ -25,7 +27,7 @@ public class Offer {
         return price;
     }
 
-    public int getAddToCartId() {
+    public String getAddToCartId() {
         return addToCartId;
     }
 
@@ -50,7 +52,7 @@ public class Offer {
         if (Double.compare(offer.price, price) != 0) {
             return false;
         }
-        if (addToCartId != offer.addToCartId) {
+        if (!Objects.equals(addToCartId, offer.addToCartId)) {
             return false;
         }
         if (item.getName() != null ? !item.getName().equals(offer.getName()) : offer.getName() != null) {
@@ -69,7 +71,7 @@ public class Offer {
         result = 31 * result + discount;
         temp = Double.doubleToLongBits(price);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + addToCartId;
+        result = addToCartId.hashCode();
         return result;
     }
 

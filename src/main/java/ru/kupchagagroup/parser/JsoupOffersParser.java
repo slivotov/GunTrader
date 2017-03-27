@@ -34,7 +34,7 @@ public class JsoupOffersParser implements OffersParser {
                 String quality = getQuality(offer);
                 int discountPercent = Integer.parseInt(discountString.substring(0, discountString.indexOf("%")));
                 double price = getPrice(offer);
-                int addToCardId = getAddToCartId(offer);
+                String addToCardId = getAddToCartId(offer);
                 Offer candidateOffer = new Offer(offerName, quality, discountPercent, price, addToCardId);
                 if (profitOfferChecker.isProfitOffer(candidateOffer)) {
                     offers.add(candidateOffer);
@@ -59,7 +59,7 @@ public class JsoupOffersParser implements OffersParser {
                     double price = getPrice(offer);
                     double suggestedPrice = getSuggestedPrice(offer);
                     int discountPercent = 100 - (int) Math.rint((price / suggestedPrice) * 100);
-                    int addToCardId = getAddToCartId(offer);
+                    String addToCardId = getAddToCartId(offer);
                     Offer candidateOffer = new Offer(offerName, quality, discountPercent, price, addToCardId);
                     if (profitOfferChecker.isProfitOffer(candidateOffer)) {
                         offers.add(candidateOffer);
@@ -97,14 +97,13 @@ public class JsoupOffersParser implements OffersParser {
         return Double.parseDouble(priceWithoutColumn);
     }
 
-    private int getAddToCartId(Element offer) {
+    private String getAddToCartId(Element offer) {
         Elements addToCardElements = offer.getElementsByAttributeValue("class", "btn btn-orange");
-        int addToCardId = 0;
+        String addToCardId = "";
         for (Element addToCardElement : addToCardElements) {
             if ("Add to Cart".equals(addToCardElement.text())) {
                 String onClickValue = addToCardElement.attr("onclick");
-                addToCardId = Integer.parseInt(
-                        onClickValue.substring(onClickValue.indexOf("(") + 1, onClickValue.length() - 1));
+                addToCardId = onClickValue.substring(onClickValue.indexOf("(") + 1, onClickValue.length() - 1);
             }
         }
         return addToCardId;

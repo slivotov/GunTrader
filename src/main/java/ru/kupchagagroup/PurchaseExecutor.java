@@ -134,11 +134,11 @@ public class PurchaseExecutor {
         return new UrlEncodedFormEntity(urlParameters);
     }
 
-    private HttpEntity getAddToCartPostBody(int addToCartId) throws UnsupportedEncodingException {
+    private HttpEntity getAddToCartPostBody(String addToCartId) throws UnsupportedEncodingException {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("type", "cart"));
         urlParameters.add(new BasicNameValuePair("param", "add"));
-        urlParameters.add(new BasicNameValuePair("id", String.valueOf(addToCartId)));
+        urlParameters.add(new BasicNameValuePair("id", addToCartId));
         return new UrlEncodedFormEntity(urlParameters);
     }
 

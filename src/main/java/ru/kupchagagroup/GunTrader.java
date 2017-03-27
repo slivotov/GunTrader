@@ -11,36 +11,36 @@ import java.io.File;
 
 public class GunTrader {
 
-    private static Logger log = Logger.getLogger(GunTrader.class.getName());
-
     public static final String NEW_SCAN_PAGE_URL = "https://opskins.com/?loc=shop_search&app=730_2&sort=n";
     public static final String SCAN_PAGE_URL = "https://opskins.com/?loc=shop_browse&app=730_2";
+    private static Logger log = Logger.getLogger(GunTrader.class.getName());
 
     public static void main(String[] args) {
-        if (args.length == 0) {
-            writeInstruction();
-            System.exit(0);
-        } else {
-            String configFileLocation = args[0];
+//        if (args.length == 0) {
+//            writeInstruction();
+//            System.exit(0);
+//        } else
+        {
+            String configFileLocation = "src/main/resources/tradeconfig.xml";
             TradeConfig config = getConfig(configFileLocation);
             log.info("Using configuration : \n" + config);
             String command = getCommand(args);
             if ("init".equals(command)) {
                 HeadersUtil.initHeaders(config);
-                System.out.println("Required headers were sucessfully initialised and persisted");
+                System.out.println("Required headers were successfully initialised and persisted");
             } else if ("scan".equals(command)) {
                 OpskinHeaders opskinHeaders = HeadersUtil.loadHeaders();
-                if(opskinHeaders == null) {
+                if (opskinHeaders == null) {
                     System.out.println("Perform init before scanning!");
                 } else {
                     PurchaseScanner purchaseScanner = new PurchaseScanner(opskinHeaders, config);
-                    purchaseScanner.startProfitPurchaseScanning();
+                    purchaseScanner.startProfitPurchaseScanning(HeadersUtil.getDriver());
                 }
             } else {
                 OpskinHeaders opskinHeaders = HeadersUtil.initHeaders(config);
                 System.out.println("Required headers were sucessfully initialised and persisted");
                 PurchaseScanner purchaseScanner = new PurchaseScanner(opskinHeaders, config);
-                purchaseScanner.startProfitPurchaseScanning();
+                purchaseScanner.startProfitPurchaseScanning(HeadersUtil.getDriver());
             }
         }
     }
