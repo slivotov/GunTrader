@@ -1,6 +1,7 @@
 package ru.kupchagagroup;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -35,7 +36,10 @@ public class PurchaseScanner {
         this.opskinHeaders = opskinHeaders;
         RequestConfig requestConfig =
                 RequestConfig.custom().setConnectionRequestTimeout(30).build();
-        this.httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+        this.httpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .setProxy(new HttpHost("localhost", 8888))
+                .build();
         this.offersParser = new JsoupOffersParser();
         this.discountOfferChecker = new DefaultProfitOfferChecker(tradeConfig);
         this.purchaseExecutor = new PurchaseExecutor(httpClient, opskinHeaders);
@@ -75,6 +79,7 @@ public class PurchaseScanner {
     private String getPageSource(String scanPageUrl, RefreshStatistics statistics, WebDriver driver) throws IOException {
         long refreshStartTime = System.currentTimeMillis();
         HttpGet get = new HttpGet(scanPageUrl);
+
         setGetHeaders(get, scanPageUrl);
         InputStream content = null;
         String pageSource;

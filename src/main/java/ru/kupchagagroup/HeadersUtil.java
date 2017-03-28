@@ -114,7 +114,7 @@ public class HeadersUtil {
         //WebDriver driver = new HtmlUnitDriver(true);
         driver.get(SCAN_PAGE_URL);
         long initialTime = System.currentTimeMillis();
-        WebElement myDynamicElement = waitAndGetWebElement(driver, "//div[@id='sc_carousel']");
+        WebElement myDynamicElement = waitAndGetWebElement(driver, ".//img[@alt='OPSkins']");
         long timeInSecondsSpentOnBotProtection = (System.currentTimeMillis() - initialTime) / 1000;
         log.info(timeInSecondsSpentOnBotProtection + " seconds spent on bot protection.");
         if (myDynamicElement != null) {
@@ -125,7 +125,7 @@ public class HeadersUtil {
                             .getPassword().isEmpty();
             String winHandBefore = driver.getWindowHandle();
             if (credentialsArePresent) {
-                driver.findElement(By.xpath("(.//*[@id='login-outer']//a)[1]")).click();
+                driver.findElement(By.xpath(".//img[@src='/images/steam_sign_in_sm.png']")).click();
                 switchToLastWindow(driver);
                 driver.findElement(By.id("steamAccountName")).sendKeys(config.getLogin());
                 driver.findElement(By.id("steamPassword")).sendKeys(config.getPassword());
