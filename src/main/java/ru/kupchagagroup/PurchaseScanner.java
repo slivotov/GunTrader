@@ -3,10 +3,12 @@ package ru.kupchagagroup;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
@@ -25,6 +27,7 @@ import static ru.kupchagagroup.GunTrader.NEW_SCAN_PAGE_URL;
 
 public class PurchaseScanner {
     private static Logger log = Logger.getLogger(PurchaseScanner.class.getName());
+    private final CookieStore cookieStore = new BasicCookieStore();
 
     private HttpClient httpClient;
     private OpskinHeaders opskinHeaders;
@@ -38,6 +41,7 @@ public class PurchaseScanner {
                 RequestConfig.custom().setConnectionRequestTimeout(30).build();
         this.httpClient = HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig)
+                .setDefaultCookieStore(cookieStore)
                 .setProxy(new HttpHost("localhost", 8888))
                 .build();
         this.offersParser = new JsoupOffersParser();
@@ -79,11 +83,13 @@ public class PurchaseScanner {
     private String getPageSource(String scanPageUrl, RefreshStatistics statistics, WebDriver driver) throws IOException {
         long refreshStartTime = System.currentTimeMillis();
         HttpGet get = new HttpGet(scanPageUrl);
-
+        cookieStore.clear();
         setGetHeaders(get, scanPageUrl);
         InputStream content = null;
         String pageSource;
         try {
+            log.trace("Sending GET...");
+
             HttpResponse offersPage = httpClient.execute(get);
             content = offersPage.getEntity().getContent();
             pageSource = IOUtils.toString(content);
