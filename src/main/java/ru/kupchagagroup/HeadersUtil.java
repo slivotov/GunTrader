@@ -15,8 +15,8 @@ import ru.kupchagagroup.config.internal.OpskinHeaders;
 import java.io.*;
 import java.util.Properties;
 
-import static ru.kupchagagroup.GunTrader.NEW_SCAN_PAGE_URL;
-import static ru.kupchagagroup.GunTrader.SCAN_PAGE_URL;
+import static ru.kupchagagroup.Utils.NEW_SCAN_PAGE_URL;
+import static ru.kupchagagroup.Utils.SCAN_PAGE_URL;
 
 public class HeadersUtil {
     public static final String USER_AGENT_HEADER_VALUE = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0";

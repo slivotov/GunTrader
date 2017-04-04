@@ -1,7 +1,6 @@
 package ru.kupchagagroup;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
@@ -23,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
-import static ru.kupchagagroup.GunTrader.NEW_SCAN_PAGE_URL;
+import static ru.kupchagagroup.Utils.NEW_SCAN_PAGE_URL;
 
 public class PurchaseScanner {
     private static Logger log = Logger.getLogger(PurchaseScanner.class.getName());
@@ -33,7 +32,6 @@ public class PurchaseScanner {
     private OpskinHeaders opskinHeaders;
     private DefaultProfitOfferChecker discountOfferChecker;
     private JsoupOffersParser offersParser;
-    private PurchaseExecutor purchaseExecutor;
 
     public PurchaseScanner(OpskinHeaders opskinHeaders, TradeConfig tradeConfig) {
         this.opskinHeaders = opskinHeaders;
@@ -42,11 +40,10 @@ public class PurchaseScanner {
         this.httpClient = HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig)
                 .setDefaultCookieStore(cookieStore)
-                .setProxy(new HttpHost("localhost", 8888))
+//                .setProxy(new HttpHost("localhost", 8888))
                 .build();
         this.offersParser = new JsoupOffersParser();
         this.discountOfferChecker = new DefaultProfitOfferChecker(tradeConfig);
-        this.purchaseExecutor = new PurchaseExecutor(httpClient, opskinHeaders);
     }
 
     public void startProfitPurchaseScanning(WebDriver driver) {
@@ -64,7 +61,7 @@ public class PurchaseScanner {
                         Collection<Offer> offers = offersParser.parseNewPage(offersPageSource, discountOfferChecker);
                         if (offers.size() > 0) {
                             log.trace("new offers found: " + offers);
-                            purchaseExecutor.buyItems(offers, offersPageSource);
+                            //purchaseExecutor.buyItems(offers, offersPageSource);
                         } else {
                             log.trace("No new offers found");
                         }

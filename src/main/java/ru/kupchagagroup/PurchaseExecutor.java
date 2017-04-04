@@ -116,7 +116,7 @@ public class PurchaseExecutor {
         post.setHeader("accept-language", "en-US,en;q=0.8,ru;q=0.6");
         post.setHeader("cookie", opskinHeaders.getCookiesHeaderValue());
         post.setHeader("origin", "https://opskins.com");
-        post.setHeader("referer", GunTrader.NEW_SCAN_PAGE_URL);
+        post.setHeader("referer", Utils.NEW_SCAN_PAGE_URL);
         post.setHeader("user-agent",
                 HeadersUtil.USER_AGENT_HEADER_VALUE);
         post.setHeader("x-csrf", opskinHeaders.getXcsrHeaderValue());

@@ -9,10 +9,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 
+import static ru.kupchagagroup.Utils.CONFIG_FILE_LOCATION;
+
 public class GunTrader {
 
-    public static final String NEW_SCAN_PAGE_URL = "https://opskins.com/?loc=shop_search&app=730_2&sort=n";
-    public static final String SCAN_PAGE_URL = "https://opskins.com/?loc=shop_browse&app=730_2";
     private static Logger log = Logger.getLogger(GunTrader.class.getName());
 
     public static void main(String[] args) {
@@ -21,8 +21,7 @@ public class GunTrader {
 //            System.exit(0);
 //        } else
         {
-            String configFileLocation = "src/main/resources/tradeconfig.xml";
-            TradeConfig config = getConfig(configFileLocation);
+            TradeConfig config = getConfig(CONFIG_FILE_LOCATION);
             log.info("Using configuration : \n" + config);
             String command = getCommand(args);
             if ("init".equals(command)) {
@@ -61,7 +60,7 @@ public class GunTrader {
                 + "successful init");
     }
 
-    private static TradeConfig getConfig(String configFileLocation) {
+    static TradeConfig getConfig(String configFileLocation) {
         if (configFileLocation == null) {
             log.error("No config file is provided. Closing program. ");
             System.exit(0);
