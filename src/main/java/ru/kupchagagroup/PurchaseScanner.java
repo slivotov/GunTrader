@@ -85,8 +85,6 @@ public class PurchaseScanner {
         InputStream content = null;
         String pageSource;
         try {
-            log.trace("Sending GET...");
-
             HttpResponse offersPage = httpClient.execute(get);
             content = offersPage.getEntity().getContent();
             pageSource = IOUtils.toString(content);
