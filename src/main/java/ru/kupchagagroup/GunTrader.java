@@ -13,9 +13,6 @@ public class GunTrader {
 
     private static Logger log = Logger.getLogger(GunTrader.class.getName());
 
-    public static final String NEW_SCAN_PAGE_URL = "https://opskins.com/?loc=shop_search&app=730_2&sort=n";
-    public static final String SCAN_PAGE_URL = "https://opskins.com/?loc=shop_browse&app=730_2";
-
     public static void main(String[] args) {
         if (args.length == 0) {
             writeInstruction();
@@ -34,13 +31,13 @@ public class GunTrader {
                     System.out.println("Perform init before scanning!");
                 } else {
                     PurchaseScanner purchaseScanner = new PurchaseScanner(opskinHeaders, config);
-                    purchaseScanner.startProfitPurchaseScanning();
+                    purchaseScanner.startProfitPurchaseScanning(HeadersUtil.getDriver());
                 }
             } else {
                 OpskinHeaders opskinHeaders = HeadersUtil.initHeaders(config);
                 System.out.println("Required headers were sucessfully initialised and persisted");
                 PurchaseScanner purchaseScanner = new PurchaseScanner(opskinHeaders, config);
-                purchaseScanner.startProfitPurchaseScanning();
+                purchaseScanner.startProfitPurchaseScanning(HeadersUtil.getDriver());
             }
         }
     }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<config>
+    <login>vovan</login>
+    <password>bozan</password>
+    <min_discount>1</min_discount>
+    <min_price>0.1</min_price>
+    <max_price>1.7</max_price>
+    <blacklist>
+        <entry>M 16 special edition</entry>
+        <entry>super mega knife</entry>
+    </blacklist>
+    <whitelist>
+        <item>
+            <name>★ Flip Knife | Boreal Forest</name>
+            <quality>Field-Tested</quality>
+            <min_price>10</min_price>
+        </item>
+        <item>
+            <name>StatTrak™ M4A1-S | Guardian</name>
+            <quality>Factory New</quality>
+            <min_price>5.5</min_price>
+        </item>
+
+        <item>
+            <name>StatTrak™ Puha | Guardian</name>
+            <min_price>2.2</min_price>
+        </item>
+    </whitelist>
+</config>

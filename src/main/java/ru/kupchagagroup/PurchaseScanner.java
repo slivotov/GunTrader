@@ -2,12 +2,10 @@ package ru.kupchagagroup;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
+import org.openqa.selenium.WebDriver;
 import ru.kupchagagroup.config.external.TradeConfig;
 import ru.kupchagagroup.config.internal.OpskinHeaders;
 import ru.kupchagagroup.domain.Offer;
@@ -19,12 +17,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
-import static ru.kupchagagroup.GunTrader.NEW_SCAN_PAGE_URL;
+import static ru.kupchagagroup.HeadersUtil.*;
+import static ru.kupchagagroup.Utils.NEW_SCAN_PAGE_URL;
 
 public class PurchaseScanner {
     private static Logger log = Logger.getLogger(PurchaseScanner.class.getName());
 
-    private HttpClient httpClient;
     private OpskinHeaders opskinHeaders;
     private DefaultProfitOfferChecker discountOfferChecker;
     private JsoupOffersParser offersParser;
@@ -32,19 +30,17 @@ public class PurchaseScanner {
 
     public PurchaseScanner(OpskinHeaders opskinHeaders, TradeConfig tradeConfig) {
         this.opskinHeaders = opskinHeaders;
-        RequestConfig requestConfig =
-                RequestConfig.custom().setConnectionRequestTimeout(30).build();
-        this.httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+
         this.offersParser = new JsoupOffersParser();
         this.discountOfferChecker = new DefaultProfitOfferChecker(tradeConfig);
-        this.purchaseExecutor = new PurchaseExecutor(httpClient, opskinHeaders);
+        this.purchaseExecutor = new PurchaseExecutor(opskinHeaders);
     }
 
-    public void startProfitPurchaseScanning() {
+    void startProfitPurchaseScanning(WebDriver driver) {
         RefreshStatistics statistics = new RefreshStatistics();
         while (true) {
             try {
-                String offersPageSource = getPageSource(NEW_SCAN_PAGE_URL, statistics);
+                String offersPageSource = getPageSource(NEW_SCAN_PAGE_URL, statistics, driver);
                 if (!offersPageSource.contains("OPSkins Bot Detection")) {
                     if (offersPageSource
                             .contains("In order to perform a custom search you must first log in. (1003)")) {
@@ -71,14 +67,15 @@ public class PurchaseScanner {
         }
     }
 
-    private String getPageSource(String scanPageUrl, RefreshStatistics statistics) throws IOException {
+    private String getPageSource(String scanPageUrl, RefreshStatistics statistics, WebDriver driver) throws IOException {
         long refreshStartTime = System.currentTimeMillis();
         HttpGet get = new HttpGet(scanPageUrl);
-        setNewGetHeaders(get, scanPageUrl);
+        getCookieStore().clear();
+        setGetHeaders(get, scanPageUrl);
         InputStream content = null;
         String pageSource;
         try {
-            HttpResponse offersPage = httpClient.execute(get);
+            HttpResponse offersPage = getHttpClient().execute(get);
             content = offersPage.getEntity().getContent();
             pageSource = IOUtils.toString(content);
 
@@ -88,14 +85,14 @@ public class PurchaseScanner {
             }
             get.releaseConnection();
         }
-        //driver.get(scanPageUrl);
-        //String pageSource = driver.getPageSource();
+//        driver.get(scanPageUrl);
+//        String pageSourceFromWebDriver = driver.getPageSource();
         statistics.updateRefreshTime(System.currentTimeMillis() - refreshStartTime);
         log.debug((float) (System.currentTimeMillis() - refreshStartTime) / 1000 + " seconds spent on refresh");
         return pageSource;
     }
 
-    private void setNewGetHeaders(HttpRequestBase post, String referer) {
+    private void setGetHeaders(HttpRequestBase post, String referer) {
         //post.setHeader("host", "opskins.com");
         post.setHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         post.setHeader("accept-encoding", "gzip, deflate, br");
@@ -105,7 +102,8 @@ public class PurchaseScanner {
         post.setHeader("referer", referer);
         //post.setHeader("upgrade-insecure-requests", "1");
         post.setHeader("user-agent",
-                HeadersUtil.USER_AGENT_HEADER_VALUE);
-        //post.setHeader("connection", "keep-alive");
+                USER_AGENT_HEADER_VALUE);
+        post.setHeader("connection", "keep-alive");
+        post.setHeader("Cache-Control", "max-age=0");
     }
 }

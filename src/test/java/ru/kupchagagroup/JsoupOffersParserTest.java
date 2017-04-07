@@ -1,5 +1,6 @@
 package ru.kupchagagroup;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import ru.kupchagagroup.parser.OffersParser;
 import ru.kupchagagroup.parser.ProfitOfferChecker;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -17,47 +19,40 @@ import static org.junit.Assert.assertEquals;
 public class JsoupOffersParserTest {
     @Test
     public void testParse() throws Exception {
-        File testHtml = new File("src/test/resources/extracted_page.html");
+        File testHtml = new File("src/test/resources/extractedPageV3.html");
         String testHtmlString = FileUtils.readFileToString(testHtml);
-        assertEquals("12345", HeadersUtil.getSteamId(testHtmlString));
+        assertEquals("753", HeadersUtil.getSteamId(testHtmlString));
         OffersParser offersParser = new JsoupOffersParser();
-        ProfitOfferChecker alwaysProfitChecker = new ProfitOfferChecker() {
-            public boolean isProfitOffer(Offer offer) {
-                return true;
-            }
-        };
-        List<Offer> offers = offersParser.parse(testHtmlString, alwaysProfitChecker);
-        assertEquals(94, offers.size());
+        ProfitOfferChecker alwaysProfitChecker = offer -> true;
+        Set<Offer> offerSet = offersParser.parseNewPage(testHtmlString, alwaysProfitChecker);
+        List<Offer> offers = new ArrayList<>(offerSet);
+        assertEquals(20, offers.size());
         Offer firstOffer = offers.get(0);
-        assertEquals(10, firstOffer.getDiscount());
-        assertEquals("★ Shadow Daggers | Boreal Forest", firstOffer.getName());
+        assertEquals(33, firstOffer.getDiscount());
+        assertEquals("AUG | Contractor", firstOffer.getName());
         assertEquals("Field-Tested", firstOffer.getQuality());
-        assertEquals(35d, firstOffer.getPrice(), 0.01d);
-        assertEquals(30889656, firstOffer.getAddToCartId());
-        Offer secondOffer = offers.get(1);
-        assertEquals(52, secondOffer.getDiscount());
-        assertEquals("Factory New", secondOffer.getQuality());
-        assertEquals(143.99d, secondOffer.getPrice(), 0.01d);
-        assertEquals(30889394, secondOffer.getAddToCartId());
+        assertEquals(0.02, firstOffer.getPrice(), 0.01d);
+        assertEquals("93316170, 730, 2", firstOffer.getAddToCartId());
+        Offer secondOffer = offers.get(16);
+        assertEquals(33, secondOffer.getDiscount());
+        assertEquals("Minimal Wear", secondOffer.getQuality());
+        assertEquals(0.02, secondOffer.getPrice(), 0.01d);
+        assertEquals("93316169, 730, 2", secondOffer.getAddToCartId());
     }
 
     @Test
     public void testNewParse() throws Exception {
-        File testHtml = new File("src/test/resources/extractedPageV2.html");
+        File testHtml = new File("src/test/resources/extractedPageV3.html");
         String testHtmlString = FileUtils.readFileToString(testHtml);
-        assertEquals("76561198321141249", HeadersUtil.getSteamId(testHtmlString));
+        assertEquals("753", HeadersUtil.getSteamId(testHtmlString));
         OffersParser offersParser = new JsoupOffersParser();
-        ProfitOfferChecker alwaysProfitChecker = new ProfitOfferChecker() {
-            public boolean isProfitOffer(Offer offer) {
-                return true;
-            }
-        };
+        ProfitOfferChecker alwaysProfitChecker = offer -> true;
         Set<Offer> offers = offersParser.parseNewPage(testHtmlString, alwaysProfitChecker);
         assertEquals(20, offers.size());
-        Offer karambit = new Offer("★ Karambit | Damascus Steel", "Field-Tested", 24, 155d, 32327436);
-        Assert.assertTrue(offers.contains(karambit));
+        Offer offer1 = new Offer("Glove Case", "", 44, 0.05, "93316177, 730, 5");
+        Assert.assertTrue(offers.contains(offer1));
 
-        Offer ddpat = new Offer("AWP | Pink DDPAT", "Minimal Wear", 23, 12.8d, 32327437);
-        Assert.assertTrue(offers.contains(ddpat));
+        Offer offer2 = new Offer("SCAR-20 | Contractor", "Minimal Wear", 33, 0.02, "93316169, 730, 2");
+        Assert.assertTrue(offers.contains(offer2));
     }
 }
