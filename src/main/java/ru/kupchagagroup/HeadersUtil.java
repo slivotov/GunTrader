@@ -1,5 +1,10 @@
 package ru.kupchagagroup;
 
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
@@ -19,32 +24,46 @@ import static ru.kupchagagroup.Utils.NEW_SCAN_PAGE_URL;
 import static ru.kupchagagroup.Utils.SCAN_PAGE_URL;
 
 public class HeadersUtil {
-    public static final String USER_AGENT_HEADER_VALUE = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0";
+    static final String USER_AGENT_HEADER_VALUE = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0";
 
     private static final String COOKIES_PERSIST_PARAM = "cookiesHeaderValue";
     private static final String XCSR_PERSIST_PARAM = "xcsrHeaderValue";
     private static final String STEAM_ID_PPERSIST_PARAM = "steamId";
     private static final String HEADERS_FILE_NAME = "header.values";
+    private static Logger log = Logger.getLogger(HeadersUtil.class.getName());
+    private static WebDriver driver;
+    private static HttpClient httpClient;
 
-    public static WebDriver getDriver() {
+    private static final CookieStore cookieStore = new BasicCookieStore();
+
+    static {
+        RequestConfig requestConfig =
+                RequestConfig.custom().setConnectionRequestTimeout(30).build();
+        httpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .setDefaultCookieStore(cookieStore)
+//                .setProxy(new HttpHost("localhost", 8888))
+                .build();
+    }
+
+    static WebDriver getDriver() {
         return driver;
     }
 
-    private static WebDriver driver;
-    private static Logger log = Logger.getLogger(HeadersUtil.class.getName());
-
-    public static OpskinHeaders initHeaders(TradeConfig config) {
+    static OpskinHeaders initHeaders(TradeConfig config) {
         driver = initDriver(config);
         String xcsrHeaderValue = getXcsrfHeaderValue(driver);
         String cookiesHeaderValue = getCookieHeaderValue(driver);
         String steamId = getSteamId(driver.getPageSource());
-//        driver.close();
+        driver.close();
         OpskinHeaders opskinHeaders = new OpskinHeaders(cookiesHeaderValue, xcsrHeaderValue, steamId);
         persistHeaders(opskinHeaders);
         return opskinHeaders;
     }
 
-    public static OpskinHeaders loadHeaders() {
+
+
+    static OpskinHeaders loadHeaders() {
         Properties prop = new Properties();
         InputStream input = null;
 
@@ -75,6 +94,7 @@ public class HeadersUtil {
             }
         }
     }
+
 
     private static void persistHeaders(OpskinHeaders opskinHeaders) {
         Properties prop = new Properties();
@@ -193,5 +213,13 @@ public class HeadersUtil {
         String startOfSteamIdDeclaration = "var g_appid_steam = ";
         int beginIndex = html.indexOf(startOfSteamIdDeclaration) + startOfSteamIdDeclaration.length();
         return html.substring(beginIndex, html.indexOf(";", beginIndex));
+    }
+
+    public static HttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    public static CookieStore getCookieStore() {
+        return cookieStore;
     }
 }

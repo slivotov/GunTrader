@@ -9,27 +9,25 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 
-import static ru.kupchagagroup.Utils.CONFIG_FILE_LOCATION;
-
 public class GunTrader {
 
     private static Logger log = Logger.getLogger(GunTrader.class.getName());
 
     public static void main(String[] args) {
-//        if (args.length == 0) {
-//            writeInstruction();
-//            System.exit(0);
-//        } else
-        {
-            TradeConfig config = getConfig(CONFIG_FILE_LOCATION);
+        if (args.length == 0) {
+            writeInstruction();
+            System.exit(0);
+        } else {
+            String configFileLocation = args[0];
+            TradeConfig config = getConfig(configFileLocation);
             log.info("Using configuration : \n" + config);
             String command = getCommand(args);
             if ("init".equals(command)) {
                 HeadersUtil.initHeaders(config);
-                System.out.println("Required headers were successfully initialised and persisted");
+                System.out.println("Required headers were sucessfully initialised and persisted");
             } else if ("scan".equals(command)) {
                 OpskinHeaders opskinHeaders = HeadersUtil.loadHeaders();
-                if (opskinHeaders == null) {
+                if(opskinHeaders == null) {
                     System.out.println("Perform init before scanning!");
                 } else {
                     PurchaseScanner purchaseScanner = new PurchaseScanner(opskinHeaders, config);
@@ -60,7 +58,7 @@ public class GunTrader {
                 + "successful init");
     }
 
-    static TradeConfig getConfig(String configFileLocation) {
+    private static TradeConfig getConfig(String configFileLocation) {
         if (configFileLocation == null) {
             log.error("No config file is provided. Closing program. ");
             System.exit(0);

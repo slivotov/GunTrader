@@ -4,7 +4,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -20,25 +19,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class PurchaseExecutor {
+import static ru.kupchagagroup.HeadersUtil.getCookieStore;
+import static ru.kupchagagroup.HeadersUtil.getHttpClient;
+
+class PurchaseExecutor {
     private static Logger log = Logger.getLogger(PurchaseExecutor.class.getName());
 
-    private HttpClient httpClient;
     private OpskinHeaders opskinHeaders;
     private double currentBalance;
 
-    public PurchaseExecutor(HttpClient httpClient, OpskinHeaders opskinHeaders) {
-        this.httpClient = httpClient;
+    PurchaseExecutor(OpskinHeaders opskinHeaders) {
         this.opskinHeaders = opskinHeaders;
     }
 
-    public void buyItems(Collection<Offer> offers, String pageSource) throws IOException {
+    void buyItems(Collection<Offer> offers, String pageSource) throws IOException {
         for (Offer offer : offers) {
             buyItem(offer, pageSource);
         }
     }
 
-    public void buyItem(Offer offer, String pageSource) throws IOException {
+    private void buyItem(Offer offer, String pageSource) throws IOException {
         //updateBalanceAndCheckNeedToContinue(pageSource);
         //if (offer.getPrice() > currentBalance) {
         //    return;
@@ -54,13 +54,14 @@ public class PurchaseExecutor {
 
     private boolean addToCardItem(Offer offerToBuy) throws IOException {
         HttpPost post = new HttpPost("https://opskins.com/ajax/shop_account.php");
+        getCookieStore().clear();
         setHeaders(post);
         post.setEntity(getAddToCartPostBody(offerToBuy.getAddToCartId()));
-        int statusCode = 0;
+        int statusCode;
         String responseEntity;
-        InputStream entity = null;
+        InputStream entity;
         try {
-            HttpResponse response = httpClient.execute(post);
+            HttpResponse response = getHttpClient().execute(post);
             statusCode = response.getStatusLine().getStatusCode();
             entity = response.getEntity().getContent();
             responseEntity = new String(IOUtils.toByteArray(entity));
@@ -85,7 +86,7 @@ public class PurchaseExecutor {
         InputStream entity = null;
         log.info("Sending http request to buy from card!");
         try {
-            HttpResponse response = httpClient.execute(post);
+            HttpResponse response = getHttpClient().execute(post);
             statusCode = response.getStatusLine().getStatusCode();
             entity = response.getEntity().getContent();
             responseEntity = new String(IOUtils.toByteArray(entity));
@@ -125,7 +126,7 @@ public class PurchaseExecutor {
     }
 
     private HttpEntity getPurchasePostBody(Offer offer) throws UnsupportedEncodingException {
-        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+        List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("accept_tos", "1"));
         urlParameters.add(new BasicNameValuePair("action", "buy"));
         urlParameters.add(new BasicNameValuePair("hidden_bal", "0"));
@@ -150,7 +151,7 @@ public class PurchaseExecutor {
         }
     }
 
-    public static double getBalance(String html) {
+    private static double getBalance(String html) {
         String startOfBalanceDeclaration = "Wallet Balance $";
         int beginIndex = html.indexOf(startOfBalanceDeclaration) + startOfBalanceDeclaration.length();
         String balanceString = html.substring(beginIndex, html.indexOf("<", beginIndex));

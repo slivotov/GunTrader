@@ -2,13 +2,8 @@ package ru.kupchagagroup;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import ru.kupchagagroup.config.external.TradeConfig;
@@ -22,31 +17,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
+import static ru.kupchagagroup.HeadersUtil.*;
 import static ru.kupchagagroup.Utils.NEW_SCAN_PAGE_URL;
 
 public class PurchaseScanner {
     private static Logger log = Logger.getLogger(PurchaseScanner.class.getName());
-    private final CookieStore cookieStore = new BasicCookieStore();
 
-    private HttpClient httpClient;
     private OpskinHeaders opskinHeaders;
     private DefaultProfitOfferChecker discountOfferChecker;
     private JsoupOffersParser offersParser;
+    private PurchaseExecutor purchaseExecutor;
 
     public PurchaseScanner(OpskinHeaders opskinHeaders, TradeConfig tradeConfig) {
         this.opskinHeaders = opskinHeaders;
-        RequestConfig requestConfig =
-                RequestConfig.custom().setConnectionRequestTimeout(30).build();
-        this.httpClient = HttpClientBuilder.create()
-                .setDefaultRequestConfig(requestConfig)
-                .setDefaultCookieStore(cookieStore)
-//                .setProxy(new HttpHost("localhost", 8888))
-                .build();
+
         this.offersParser = new JsoupOffersParser();
         this.discountOfferChecker = new DefaultProfitOfferChecker(tradeConfig);
+        this.purchaseExecutor = new PurchaseExecutor(opskinHeaders);
     }
 
-    public void startProfitPurchaseScanning(WebDriver driver) {
+    void startProfitPurchaseScanning(WebDriver driver) {
         RefreshStatistics statistics = new RefreshStatistics();
         while (true) {
             try {
@@ -61,7 +51,7 @@ public class PurchaseScanner {
                         Collection<Offer> offers = offersParser.parseNewPage(offersPageSource, discountOfferChecker);
                         if (offers.size() > 0) {
                             log.trace("new offers found: " + offers);
-                            //purchaseExecutor.buyItems(offers, offersPageSource);
+                            purchaseExecutor.buyItems(offers, offersPageSource);
                         } else {
                             log.trace("No new offers found");
                         }
@@ -80,12 +70,12 @@ public class PurchaseScanner {
     private String getPageSource(String scanPageUrl, RefreshStatistics statistics, WebDriver driver) throws IOException {
         long refreshStartTime = System.currentTimeMillis();
         HttpGet get = new HttpGet(scanPageUrl);
-        cookieStore.clear();
+        getCookieStore().clear();
         setGetHeaders(get, scanPageUrl);
         InputStream content = null;
         String pageSource;
         try {
-            HttpResponse offersPage = httpClient.execute(get);
+            HttpResponse offersPage = getHttpClient().execute(get);
             content = offersPage.getEntity().getContent();
             pageSource = IOUtils.toString(content);
 
@@ -112,7 +102,7 @@ public class PurchaseScanner {
         post.setHeader("referer", referer);
         //post.setHeader("upgrade-insecure-requests", "1");
         post.setHeader("user-agent",
-                HeadersUtil.USER_AGENT_HEADER_VALUE);
+                USER_AGENT_HEADER_VALUE);
         post.setHeader("connection", "keep-alive");
         post.setHeader("Cache-Control", "max-age=0");
     }
