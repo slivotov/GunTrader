@@ -6,6 +6,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
+import static ru.kupchagagroup.HeadersUtil.USER_AGENT_HEADER_VALUE;
+import static ru.kupchagagroup.HeadersUtil.getCookieStore;
+import static ru.kupchagagroup.HeadersUtil.getHttpClient;
+import static ru.kupchagagroup.Utils.NEW_SCAN_PAGE_URL;
 import ru.kupchagagroup.config.external.TradeConfig;
 import ru.kupchagagroup.config.internal.OpskinHeaders;
 import ru.kupchagagroup.domain.Offer;
@@ -16,9 +20,6 @@ import ru.kupchagagroup.parser.JsoupOffersParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-
-import static ru.kupchagagroup.HeadersUtil.*;
-import static ru.kupchagagroup.Utils.NEW_SCAN_PAGE_URL;
 
 public class PurchaseScanner {
     private static Logger log = Logger.getLogger(PurchaseScanner.class.getName());
@@ -50,7 +51,7 @@ public class PurchaseScanner {
                     } else {
                         Collection<Offer> offers = offersParser.parseNewPage(offersPageSource, discountOfferChecker);
                         if (offers.size() > 0) {
-                            log.trace("new offers found: " + offers);
+                            log.info("new offers found: " + offers);
                             purchaseExecutor.buyItems(offers, offersPageSource);
                         } else {
                             log.trace("No new offers found");
