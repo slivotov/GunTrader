@@ -146,7 +146,7 @@ public class HeadersUtil {
             String winHandBefore = driver.getWindowHandle();
             if (credentialsArePresent) {
                 driver.findElement(By.xpath(".//img[@src='/images/steam_sign_in_sm.png']")).click();
-                switchToLastWindow(driver);
+                switchToSteamLoginPage(driver);
                 driver.findElement(By.id("steamAccountName")).sendKeys(config.getLogin());
                 driver.findElement(By.id("steamPassword")).sendKeys(config.getPassword());
                 driver.findElement(By.id("imageLogin")).click();
@@ -174,6 +174,12 @@ public class HeadersUtil {
         throw new RuntimeException("Unable to get market offers page!");
     }
 
+    private static void switchToSteamLoginPage(WebDriver driver) {
+        while(driver.getCurrentUrl().equals("https://opskins.com/?loc=login")){
+            switchToLastWindow(driver);
+        }
+    }
+
     private static WebElement waitAndGetWebElement(WebDriver driver, String xpath) {
         return (new WebDriverWait(driver, 30))
                     .until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
@@ -183,6 +189,7 @@ public class HeadersUtil {
         for (String winHandle : driver.getWindowHandles()) {
             driver.switchTo().window(winHandle);
         }
+
     }
 
     private static String getXcsrfHeaderValue(WebDriver driver) {
