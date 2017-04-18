@@ -43,6 +43,7 @@ public class HeadersUtil {
                 .setDefaultRequestConfig(requestConfig)
                 .setDefaultCookieStore(cookieStore)
 //                .setProxy(new HttpHost("localhost", 8888))
+                .disableCookieManagement()
                 .build();
     }
 
@@ -60,8 +61,6 @@ public class HeadersUtil {
         persistHeaders(opskinHeaders);
         return opskinHeaders;
     }
-
-
 
     static OpskinHeaders loadHeaders() {
         Properties prop = new Properties();
@@ -94,7 +93,6 @@ public class HeadersUtil {
             }
         }
     }
-
 
     private static void persistHeaders(OpskinHeaders opskinHeaders) {
         Properties prop = new Properties();

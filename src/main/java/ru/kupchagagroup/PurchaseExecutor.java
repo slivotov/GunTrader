@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static ru.kupchagagroup.HeadersUtil.getCookieStore;
 import static ru.kupchagagroup.HeadersUtil.getHttpClient;
 
 class PurchaseExecutor {
@@ -54,7 +53,6 @@ class PurchaseExecutor {
 
     private boolean addToCardItem(Offer offerToBuy) throws IOException {
         HttpPost post = new HttpPost("https://opskins.com/ajax/shop_account.php");
-        getCookieStore().clear();
         setHeaders(post);
         post.setEntity(getAddToCartPostBody(offerToBuy.getAddToCartId()));
         int statusCode;
