@@ -46,7 +46,7 @@ public class GmailService {
      * at ~/.credentials/gmail-java-quickstart
      */
     private static final List<String> SCOPES =
-            Arrays.asList(GmailScopes.GMAIL_READONLY);
+            Arrays.asList(GmailScopes.GMAIL_MODIFY);
     /**
      * Global instance of the {@link FileDataStoreFactory}.
      */

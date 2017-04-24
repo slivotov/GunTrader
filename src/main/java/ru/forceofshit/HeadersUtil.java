@@ -16,6 +16,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.forceofshit.config.external.TradeConfig;
 import ru.forceofshit.config.internal.OpskinHeaders;
+import ru.forceofshit.gmail.PasswordGetter;
 
 import java.io.*;
 import java.util.Properties;
@@ -145,17 +146,6 @@ public class HeadersUtil {
             if (credentialsArePresent) {
                 goThroughSteamAuth(config, driver);
             }
-            if (credentialsArePresent) {
-                System.out.print("Make what Steam asks and press Enter");
-            } else {
-                System.out.print("Login in browser and press enter");
-            }
-            try {
-                br.readLine();
-            } catch (IOException e) {
-                log.error("Wtf?!?", e);
-                throw new RuntimeException();
-            }
             driver.switchTo().window(winHandBefore);
             driver.get(NEW_SCAN_PAGE_URL);
             return driver;
@@ -172,7 +162,17 @@ public class HeadersUtil {
         driver.findElement(By.id("imageLogin")).click();
         WebElement steamGuard = waitAndGetWebElement(driver, ".//div[@class='newmodal']");
         steamGuard.findElement(By.xpath(".//div[@data-modalstate='submit']")).click();
-        steamGuard.findElement(By.id("authcode")).click();
+        String steamPassword = null;
+        try {
+            steamPassword = new PasswordGetter().getPassword();
+        } catch (IOException e) {
+            throw new RuntimeException("Something goes wrong with getting Password from email",e);
+        }
+        steamGuard.findElement(By.id("authcode")).sendKeys(steamPassword);
+        steamGuard.findElement(By.className("auth_button_h3")).click();
+        sleep(1500);
+        steamGuard.findElement(By.id("success_continue_btn")).click();
+        sleep(3000);
     }
 
     private static void switchToSteamLoginPage(WebDriver driver) {
@@ -229,5 +229,13 @@ public class HeadersUtil {
 
     public static CookieStore getCookieStore() {
         return cookieStore;
+    }
+
+    private static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

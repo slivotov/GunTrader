@@ -21,19 +21,7 @@ public class GunTrader {
             String configFileLocation = args[0];
             TradeConfig config = getConfig(configFileLocation);
             log.info("Using configuration : \n" + config);
-            String command = getCommand(args);
-            if ("init".equals(command)) {
-                HeadersUtil.initHeaders(config);
-                System.out.println("Required headers were sucessfully initialised and persisted");
-            } else if ("scan".equals(command)) {
-                OpskinHeaders opskinHeaders = HeadersUtil.loadHeaders();
-                if(opskinHeaders == null) {
-                    System.out.println("Perform init before scanning!");
-                } else {
-                    PurchaseScanner purchaseScanner = new PurchaseScanner(opskinHeaders, config);
-                    purchaseScanner.startProfitPurchaseScanning(HeadersUtil.getDriver());
-                }
-            } else {
+                while(true){
                 OpskinHeaders opskinHeaders = HeadersUtil.initHeaders(config);
                 System.out.println("Required headers were sucessfully initialised and persisted");
                 PurchaseScanner purchaseScanner = new PurchaseScanner(opskinHeaders, config);
@@ -52,10 +40,6 @@ public class GunTrader {
     private static void writeInstruction() {
         System.out.println("Provide following arguments : ");
         System.out.println("1 argument: config file location");
-        System.out.println("2 argument: optional. If not provided then init followed by scanning. ");
-        System.out.println("                      'init' - only initialisation is done");
-        System.out.println("                      'scan' - then scan is started. Must be executed after "
-                + "successful init");
     }
 
     private static TradeConfig getConfig(String configFileLocation) {
